@@ -1,3 +1,18 @@
+% Universidad de Buenos Aires
+% Maestria en Explotacion de Datos y Descubrimiento de Conocimiento
+% Series de Tiempo
+% Profesor: Marcelo Risk
+% 2016
+
+<!--pandoc
+t: pdf
+output: informe
+table-of-contents: 
+variable: geometry:margin=2cm
+number-sections:
+-->
+
+```{r echo=FALSE, results='hide', message=FALSE}
 #workingDirectory = 'F:\\tp-series temporales\\subsets\\'  
 #setwd(workingDirectory)
 
@@ -73,7 +88,18 @@ plotFFT <- function(fftmod, N, maxsindc, indicepicomax) {
 interpolar = TRUE;
 #interpolar = FALSE;
 ##############################################################
+```
 
+# Introduccion
+El presente trabajo intenta estudiar exportaciones, etc.
+
+# Presentacion de los datos
+Los datos provienen de registros aduaneros para 2014 y 2015, etc.
+
+# Pre-procesamiento de los datos
+En primera instancia fueron sumarizados por dia-aduana-mercaderia, etc. Se filtraron las series que tuvieran pocos datos. Dado que algunas herramientas de analisis presuponen que las muestras fueron tomadas en forma equiespaciada en el tiempo, se rellenaron los dias en cada serie especifica, para los cuales no hubiera registro de exportacion. Se interpolaron, etc.
+
+```{r echo=FALSE, results='hide', message=FALSE}
 # series_2014_2015_aduana_37_mercaderia_3 tiene muchos dias con datos (pero no para todos los dias)
 mydata.subset.file = 'series_2014_2015_aduana_37_mercaderia_3.csv'
 # para exagerar discontinuidades, series_2014_2015_aduana_8_mercaderia_73 tiene muchos menos dias con datos
@@ -99,7 +125,13 @@ lines(mydata.subset.rellenado.interpolado$y, lty=3)
 # usando datos interpolados y ya no original
 plot(as.Date(mydata.subset.rellenado.interpolado$x, origin='2014-01-01'), mydata.subset.rellenado.interpolado$y, type='l', xaxt="n")
 axis.Date(1, at=seq(as.Date('20140101', "%Y%m%d"), as.Date('20160101', "%Y%m%d"), by="30 day"), format="%m-%Y", las=2)
+```
 
+# Analisis exploratorio
+
+## Componentes principales de frecuencia
+
+```{r echo=FALSE, results='hide', message=FALSE}
 # fft para detectar picos en frecuencias especificas, filtrar, etc
 mydata.subset.rellenado.N = 365*2
 mydata.subset.rellenado.N = length(mydata.subset.rellenado.interpolado$x)
@@ -113,7 +145,11 @@ fftmod.mydata.subset.rellenado.interpolado.maxsindc = fftmod.mydata.subset.relle
 # por ejemplo en series_2014_2015_aduana_37_mercaderia_3: estacionalidad semanal?
 mydata.subset.rellenado.indicepicomax = which(fftmod.mydata.subset.rellenado.interpolado==fftmod.mydata.subset.rellenado.interpolado.maxsindc)
 plotFFT(fftmod.mydata.subset.rellenado.interpolado, mydata.subset.rellenado.N, fftmod.mydata.subset.rellenado.interpolado.maxsindc, mydata.subset.rellenado.indicepicomax)
+```
 
+## Deteccion y filtrado de estacionalidades
+
+```{r echo=FALSE, results='hide', message=FALSE}
 # filtrar estacionalidad
 # sin estacionalidad
 filtro.quitaestacionalidad = rep(1, mydata.subset.rellenado.N)
@@ -125,7 +161,6 @@ fftmod.mydata.subset.rellenado.interpolado.sinestacionalidad = Mod(fft.mydata.su
 mydata.subset.rellenado.interpolado.sinestacionalidad = Re(fft(fft.mydata.subset.rellenado.interpolado.sinestacionalidad, inverse=TRUE) / mydata.subset.rellenado.N)
 plot(as.Date(mydata.subset.rellenado.interpolado$x, origin='2014-01-01'), mydata.subset.rellenado.interpolado.sinestacionalidad, type='l', xaxt="n")
 axis.Date(1, at=seq(as.Date('20140101', "%Y%m%d"), as.Date('20160101', "%Y%m%d"), by="30 day"), format="%m-%Y", las=2)
-
 
 #fft.mydata.subset.rellenado.interpolado[1] = 0
 #fft.mydata.subset.rellenado.interpolado[2] = 0
@@ -227,4 +262,5 @@ lines (tiempo,mydata.subset.rellenado$cantidad.scaled,col='green')
 ccf(drop(mydata.subset.rellenado$importe.scaled),drop(mydata.subset.rellenado$kilos.scaled),lag.max=50)
 ccf(drop(mydata.subset.rellenado$importe.scaled),drop(mydata.subset.rellenado$cantidad.scaled),lag.max=50)
 ccf(drop(mydata.subset.rellenado$kilos.scaled),drop(mydata.subset.rellenado$cantidad.scaled),lag.max=50)
+```
 

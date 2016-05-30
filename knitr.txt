@@ -1,0 +1,2 @@
+library(knitr); knit('tp_exploracion.Rmd'); pandoc('tp_exploracion.md','latex');
+
