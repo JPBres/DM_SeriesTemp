@@ -247,8 +247,11 @@ mydata.subset.rellenado.DF =  Re(fft(fft.mydata.subset.rellenado.DF,inverse=TRUE
 plot(tiempo, mydata.subset.rellenado$importe, type="l",ylab='importe')
 lines (tiempo,mydata.subset.rellenado.DF,col='red')
 title(ylab='importe',main="Relación entre original y luego de fft")
+```
 
+## Correlaciones
 
+```{r echo=FALSE, results='hide', message=FALSE}
 ##############################################################
 #Normaliza las variables numericas, ya rellenas con todos los dias y con ceros.
 mydata.subset.rellenado$cantidad.scaled  <- scale(mydata.subset.rellenado$cantidad)
