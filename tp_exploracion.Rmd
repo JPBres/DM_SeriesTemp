@@ -111,7 +111,7 @@ mydata.subset = leerCSV(mydata.subset.file)
 plot(convertToDate(mydata.subset$fecha_oficia), mydata.subset$importe, type='l', pch=16, cex=0.6, xaxt="n")
 axis.Date(1, at=seq(as.Date('20140101', "%Y%m%d"), as.Date('20160101', "%Y%m%d"), by="30 day"), format="%m-%Y", las=2)
 
-# faltan varios dias: 'rellenar' (aun sin dato de importe) para tener equiespaciado
+# faltan varios dias: 'rellenar' (aun sin dato de importe) para tener equi-espaciado
 mydata.subset.rellenado = rellenarDias(mydata.subset)
 plot(mydata.subset.rellenado$numero_dia, mydata.subset.rellenado$importe, type='l', pch=16, cex=0.6, xaxt="n")
 points(mydata.subset.rellenado$numero_dia, mydata.subset.rellenado$importe, pch='.', cex=3)
