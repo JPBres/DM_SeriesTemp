@@ -1,0 +1,238 @@
+---
+title: Trabajo Final - Series de Tiempo
+author: Paula Beati, Damian Farias, Juan Pablo Bresciani, Nestor Coppolillo 
+date: Julio 2016
+output:   pdf_document
+fontsize: 11pt
+geometry: margin=2cm,top=0.5in,bottom=0.5in
+---
+
+
+
+## Universidad de Buenos Aires
+## **Maestria en Explotacion de Datos y Descubrimiento de Conocimiento**
+#### *Profesor: Marcelo Risk*
+
+
+```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+# Settings
+workingDirectory = '/DM/stiempo/TP' 
+setwd(workingDirectory)
+
+#install.packages("ggplot2")
+library(ggplot2)
+
+# Trae funciones
+source("tp_funciones.R")
+# Titulos
+source("tp_titulos.R")
+```
+
+$\pagebreak$ 
+
+# Resumen
+El trabajo final de la materia Series de Tiempo consiste en aplicar las tecnicas aprendidas sobre un dataset, observar los resultados y obtener conclusiones.
+
+En nuestro caso, seleccionamos series de exportaciones argentinas durante los años 2014 y 2015. En principio realizamos un analisis exploratorio de los datos comparando distintos intervalos de tiempo: diario, semanal y mensual.
+
+Algunas series se transformaron al dominio frecuencia,se aplicaron distintos filtros y fueron vueltos a generar en el dominio tiempo con la transformada inversa para compararlas con su formato original.
+
+Se realizaron correlaciones entre series de exportaciones de un mismo producto con igual rango e intervalo de tiempo y distintos lugares de salida, buscando predicciones entre ellas.
+
+# Introducción
+Las exportaciones argentinas son datos que se pueden presentar como series de tiempo, considerando como intervalo de tiempo los dias, semanas, meses, etc. 
+
+En nuestro caso consideramos las realizadas durante los años 2014 y 2015 agrupadas diariamente por importe, cantidad y peso. Estas tres magnitudes permiten un analisis de la informacion desde distintos puntos de vista.
+
+Asimismo, para facilitar la comprensión de los resultados, las agrupamos por dos atributos: el lugar de origen (la aduana de salida del producto) y el tipo de mercadería a nivel de capitulo, que los clasifica en 99 tipos distintos.
+
+Resumiendo, cada serie tiene la siguiente estructura:
+
+ * Aduana. (por ej: Mar del Plata, Buenos Aires, etc.)
+ * Tipo de mercaderia (carne bovina, manzanas, minerales, pinturas, etc.)
+ * Fecha de exportacion (por dia)
+ * Cantidad
+ * Kilos
+ * Importe
+ 
+# Hipótesis y Objetivos
+
+# Material y Métodos
+
+## Pre-procesamiento de los datos
+Como los datos fueron sumarizados por aduana-mercaderia-dia para todas las exportaciones, se filtraron las series que tuvieran pocos datos. 
+Por otro lado, dado que algunas herramientas de analisis presuponen que las muestras fueron tomadas en forma equiespaciada en el tiempo, se rellenaron los dias donde no hubo registro de exportacion usando interpolacion.
+
+Ejemplo de serie con los datos originales y luego de la interpolacion
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Serie Original e Interpolada', fig.height=2.5, fig.width=3.8}
+subset.file = 'subsets/series_2014_2015_aduana_8_mercaderia_73.csv'
+subset.d.8.73 = leerCSV(subset.file)
+q.d.8.73.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.d.8.73 ,main=titulo.d.8.73.o ,geom = c("line", "smooth"), xlab='Dias')
+
+# faltan varios dias: 'rellenar' (aun sin dato de importe) para tener equi-espaciado
+# Interpola con approx
+subset.d.8.73.i.i = data.frame(interpolarValores(rellenarDias(subset.d.8.73), TRUE))
+q.d.8.73.i.i <- qplot(x, y, data=subset.d.8.73.i.i ,main=titulo.d.8.73.i ,geom = c("line", "smooth"), xlab='Dias', ylab='Importe')
+
+par( mfrow = c(1,2) )
+q.d.8.73.i
+q.d.8.73.i.i
+
+#plot(convertToDate(subset.d.8.73$fecha_oficia), subset.d.8.73$importe, type='l', pch=16, cex=0.6, xaxt="n", xlab= 'Dias', ylab='Importe')
+#axis.Date(1, at=seq(as.Date('20140101', "%Y%m%d"), as.Date('20160101', "%Y%m%d"), by="60 day"), format="%m-%Y", las=2)
+```
+
+
+## Analisis de series usando distintos intervalos de tiempo
+
+Comparamos una serie con sus datos agrupados por distintos intervalos de tiempo
+
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Intervalo diario y semanal', fig.height=2.5, fig.width=3.7}
+subset.file = 'subsets/series_2014_2015_aduana_37_mercaderia_3.csv'
+subset.d.37.3 = leerCSV(subset.file)
+q.d.37.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.d.37.3 ,main=titulo.d.37.3.i ,geom = c("line", "smooth"), xlab='Dias')
+
+subset.file = 'subsets/series_2014_2015_s_aduana_37_mercaderia_3.csv'
+subset.s.37.3 = leerCSV(subset.file)
+# Por importe
+q.s.37.3.i <- qplot(semana, importe, data=subset.s.37.3 ,main=titulo.s.37.3.i ,geom = c("line", "smooth"))
+# Por kilos
+q.s.37.3.k <- qplot(semana, kilos, data=subset.s.37.3 ,main=titulo.s.37.3.k ,geom = c("line", "smooth"))
+# Por cantidad
+q.s.37.3.c <- qplot(semana, cantidad, data=subset.s.37.3 ,main=titulo.s.37.3.c ,geom = c("line", "smooth"))
+
+subset.file = 'subsets/series_2014_2015_m_aduana_37_mercaderia_3.csv'
+subset.m.37.3 = leerCSV(subset.file)
+q.m.37.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.37.3 ,main=titulo.m.37.3 ,geom = c("line", "smooth"), xlab='Meses')
+
+par( mfrow = c(1,2) )
+q.d.37.3.i
+q.s.37.3.i
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Intervalo mensual', fig.height=2.5, fig.width=4}
+q.m.37.3.i
+```
+
+$\pagebreak$ 
+
+## Aplicacion de filtros a la series
+
+
+## Deteccion y filtrado de estacionalidades
+
+
+## Correlacion
+Analizamos series de exportaciones de pescados realizadas desde ocho aduanas, seis maritimas y las otras dos cercanas a un río, durante los años 2014 y 2015. Primero vemos las series de las aduanas mensuales por importe.
+
+
+```{r echo=FALSE, results='hide', message=FALSE}
+# Series con valores agrupados por MES. Tienen datos todas los meses, no hace falta rellenarlos
+subset.file = 'subsets/series_2014_2015_m_aduana_14_mercaderia_3.csv'
+subset.m.14.3 = leerCSV(subset.file)
+subset.file = 'subsets/series_2014_2015_m_aduana_19_mercaderia_3.csv'
+subset.m.19.3 = leerCSV(subset.file)
+subset.file = 'subsets/series_2014_2015_m_aduana_20_mercaderia_3.csv'
+subset.m.20.3 = leerCSV(subset.file)
+subset.file = 'subsets/series_2014_2015_m_aduana_37_mercaderia_3.csv'
+subset.m.37.3 = leerCSV(subset.file)
+subset.file = 'subsets/series_2014_2015_m_aduana_47_mercaderia_3.csv'
+subset.m.47.3 = leerCSV(subset.file)
+subset.file = 'subsets/series_2014_2015_m_aduana_62_mercaderia_3.csv'
+subset.m.62.3 = leerCSV(subset.file)
+subset.file = 'subsets/series_2014_2015_m_aduana_67_mercaderia_3.csv'
+subset.m.67.3 = leerCSV(subset.file)
+subset.file = 'subsets/series_2014_2015_m_aduana_87_mercaderia_3.csv'
+subset.m.87.3 = leerCSV(subset.file)
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=1.5, fig.width=3.5 }
+# Por importe
+q.m.14.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.14.3 ,main=titulo.14.3 ,geom = c("line", "smooth"), xlab='Meses')
+q.m.19.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.19.3 ,main=titulo.19.3 ,geom = c("line", "smooth"), xlab='Meses')
+q.m.20.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.20.3 ,main=titulo.20.3 ,geom = c("line", "smooth"), xlab='Meses')
+q.m.37.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.37.3 ,main=titulo.37.3 ,geom = c("line", "smooth"), xlab='Meses')
+q.m.47.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.47.3 ,main=titulo.47.3 ,geom = c("line", "smooth"), xlab='Meses')
+q.m.62.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.62.3 ,main=titulo.62.3 ,geom = c("line", "smooth"), xlab='Meses')
+q.m.67.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.67.3 ,main=titulo.67.3 ,geom = c("line", "smooth"), xlab='Meses')
+q.m.87.3.i <- qplot(convertToDate(fecha_oficia), importe, data=subset.m.87.3 ,main=titulo.87.3 ,geom = c("line", "smooth"), xlab='Meses')
+
+par( mfrow = c(1,2) )
+q.m.20.3.i;q.m.62.3.i
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=1.5, fig.width=3.5 }
+par( mfrow = c(1,2) )
+q.m.37.3.i;q.m.47.3.i
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=1.5, fig.width=3.5 }
+par( mfrow = c(1,2) )
+q.m.14.3.i;q.m.19.3.i
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=1.5, fig.width=3.5 }
+q.m.87.3.i;q.m.67.3.i
+par( mfrow = c(1,1) )
+```
+
+
+Ahora hacemos una correlacion entre la aduana Mar del Plata y las otras cinco aduanas maritimas.
+
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=2.5, fig.width=3.8 }
+# t.aduana.47 <- "Ad.Pto.Madryn"
+corr.m.37.47 <- ccf (subset.m.37.3$importe, subset.m.47.3$importe, lag.max = 50, main = titulo.37.47.corr)
+# t.aduana.14 <- "Ad.Comodoro Rivadavia"
+corr.m.37.14 <- ccf (subset.m.37.3$importe, subset.m.14.3$importe, lag.max = 50, main = titulo.37.14.corr)
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=2.5, fig.width=3.8 }
+#t.aduana.87 <- "Ad.Caleta Olivia"
+corr.m.37.87 <- ccf (subset.m.37.3$importe, subset.m.87.3$importe, lag.max = 50, main = titulo.37.87.corr)
+#t.aduana.19 <- "Ad.Pto.Deseado"
+corr.m.37.19 <- ccf (subset.m.37.3$importe, subset.m.19.3$importe, lag.max = 50, main = titulo.37.19.corr)
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=2.5, fig.width=3.8 }
+#t.aduana.67 <- "Ad.Ushuaia"
+corr.m.37.67 <- ccf (subset.m.37.3$importe, subset.m.67.3$importe, lag.max = 50, main = titulo.37.67.corr)
+par( mfrow = c(1,1) )
+```
+
+$\pagebreak$ 
+
+Y correlacionamos tres ciudades cercanas entre ellas
+
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=2.5, fig.width=3.8 }
+corr.m.14.87 <- ccf (subset.m.14.3$importe, subset.m.87.3$importe, lag.max = 50, main = titulo.14.87.corr)
+corr.m.14.19 <- ccf (subset.m.14.3$importe, subset.m.19.3$importe, lag.max = 50, main = titulo.14.19.corr)
+```
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=2.5, fig.width=3.8 }
+corr.m.87.19 <- ccf (subset.m.87.3$importe, subset.m.19.3$importe, lag.max = 50, main = titulo.87.19.corr)
+```
+
+
+Y dos ciudades a orillas del rio Parana.
+
+
+```{r echo=FALSE, results='hide', message=FALSE, fig.cap='Series mensuales', fig.height=2.5, fig.width=3.8 }
+corr.m.20.62 <- ccf (subset.m.20.3$importe, subset.m.62.3$importe, lag.max = 50, main = titulo.20.62.corr)
+```
+
+# Resultados
+
+
+# Discusión y conclusiones
+
+# Bibliografía
+
+# Anexos
+<!--![Caption](subsets/mapa_ciudades.pdf) --> 
+ 
+
+
