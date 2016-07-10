@@ -25,9 +25,16 @@ t.kilos     <- "Kilos"
 t.cantidad  <- "Cantidad"
 t.original  <- "Original"
 t.interpolado <- "Interpol."
-
+t.relleno   <- "Relleno"
+t.sinestacionalidad <- "Sin estac."
 titulo.d.8.73.o <- paste(t.aduana.8 , t.merc.73, t.original,    sep = " - ")
 titulo.d.8.73.i <- paste(t.aduana.8 , t.merc.73, t.interpolado, sep = " - ")
+
+titulo.37.3.original    <- paste(t.aduana.37 , t.merc.3, t.original, sep = " - ")
+titulo.37.3.relleno     <- paste(t.aduana.37 , t.merc.3, t.relleno, sep = " - ")
+titulo.37.3.interpolado <- paste(t.aduana.37 , t.merc.3, t.interpolado, sep = " - ") 
+titulo.37.3.fft         <- "Serie en el dominio de Frecuencia"
+titulo.37.3.sinestacionalidad <- paste(t.aduana.37 , t.merc.3, t.sinestacionalidad, sep = " - ")
 
 titulo.d.37.3.i <- paste(t.aduana.37 , t.merc.3, t.d, sep = " - ")
 titulo.d.37.3.k <- paste(t.aduana.37 , t.merc.3, t.d, t.kilos, sep = " - ")
